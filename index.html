@@ -1,0 +1,1311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Run n8n on Your Own Computer — Setup Guide</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='16' fill='%235C1010'/%3E%3Ctext x='16' y='22' font-size='15' text-anchor='middle' fill='%23F2A93B' font-family='Georgia' font-weight='bold'%3En%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700;9..144,800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --maroon-dark: #4A1414;
+    --maroon: #5C1010;
+    --maroon-bright: #8B1E1E;
+    --saffron: #E8720C;
+    --saffron-light: #F2A93B;
+    --ivory: #FDF6EC;
+    --cream: #F7E7C6;
+    --cream-deep: #F2C583;
+    --ink: #241211;
+    --ink-soft: #6b4f47;
+    --line: rgba(74,20,20,0.12);
+    --mono: "JetBrains Mono", "SF Mono", "Cascadia Code", Consolas, "Courier New", monospace;
+    --serif: "Fraunces", Georgia, "Iowan Old Style", "Palatino Linotype", serif;
+    --sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    margin: 0;
+    font-family: var(--sans);
+    background: var(--ivory);
+    color: var(--ink);
+    line-height: 1.5;
+  }
+
+  a { color: inherit; }
+
+  /* ---------- Site header (red bar + text brand) ---------- */
+
+  .topbar { background: #fff; border-bottom: 1px solid #f0e6d3; font-size: 12px; color: #6b7280; position: sticky; top: 0; z-index: 100; }
+  .topbar-inner { max-width: 1280px; margin: 0 auto; padding: 7px 20px; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+  .topbar a.brand-mini { color: var(--maroon); font-weight: 700; text-decoration: none; display: flex; gap: 8px; align-items: center; }
+  .topbar a.brand-mini img { width: 20px; height: 20px; }
+  .topbar-links { display: flex; gap: 16px; align-items: center; }
+  .topbar-links a { color: #CC0000; text-decoration: none; font-weight: 500; font-size: 12px; }
+  .topbar-links a:hover { text-decoration: underline; }
+  @media (max-width: 860px) { .topbar-links a:not(:first-child) { display: none; } }
+
+  .ghead { position: sticky; top: 0; z-index: 90; background: #fff; height: 106px; display: flex; align-items: center; padding: 0 20px 0 372px; border-bottom: 1px solid #f0e6d3; }
+  .logocard { position: absolute; left: 22px; top: 50%; transform: translateY(-50%); background: #fff; border: 1px solid #f0e6d3; border-radius: 14px; width: 304px; padding: 14px 20px; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 28px rgba(92,16,16,.14); z-index: 2; }
+  .logocard img { width: 100%; height: auto; display: block; }
+  .gnav { position: relative; z-index: 2; margin-left: auto; display: flex; gap: 4px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
+  .gnav a { color: var(--maroon); text-decoration: none; font-size: 13px; font-weight: 600; padding: 8px 14px; border-radius: 6px; }
+  .gnav a:hover { background: var(--cream); }
+  .gnav a.dl { background: var(--saffron); color: #fff; font-weight: 700; border: 2px solid var(--saffron); border-radius: 4px; padding: 7px 20px; }
+  .gnav a.dl:hover { background: var(--maroon); border-color: var(--maroon); color: #fff; }
+  @media (max-width: 980px) { .ghead { padding-left: 300px; } }
+  @media (max-width: 700px) {
+    .topbar, .ghead { position: static; }
+    .ghead { padding-left: 196px; height: 76px; }
+    .logocard { width: 172px; padding: 8px 12px; left: 10px; }
+    .gnav { display: none; }
+  }
+
+  /* ---------- Layout shell ---------- */
+
+  .shell {
+    display: flex;
+    min-height: 100vh;
+    max-width: 1280px;
+    margin: 0 auto;
+  }
+
+  .rail { flex: 0 0 260px; width: 260px; }
+  main { flex: 1 1 auto; min-width: 0; }
+
+  @media (max-width: 900px) {
+    .shell { flex-direction: column; }
+    .rail { flex: 0 0 auto; width: auto; }
+  }
+
+  /* ---------- Sidebar / step tracker ---------- */
+
+  .rail {
+    background: var(--maroon-dark);
+    color: var(--cream);
+    position: sticky;
+    top: 106px;
+    height: calc(100vh - 106px);
+    overflow-y: auto;
+    padding: 28px 0 28px 0;
+    border-right: 1px solid rgba(0,0,0,0.2);
+  }
+
+  @media (max-width: 900px) {
+    .rail {
+      position: sticky;
+      height: auto;
+      top: 0;
+      z-index: 50;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      overflow-x: auto;
+      overflow-y: hidden;
+      white-space: nowrap;
+    }
+  }
+
+  .rail-brand {
+    padding: 0 24px 22px 24px;
+    font-family: var(--serif);
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #fff;
+    border-bottom: 1px solid rgba(255,255,255,0.12);
+    margin-bottom: 10px;
+  }
+  .rail-brand span { display:block; font-family: var(--sans); font-weight: 400; font-size: 0.72rem; color: var(--saffron-light); margin-top: 4px; letter-spacing: 0.02em; }
+
+  @media (max-width: 900px) {
+    .rail-brand { display: none; }
+  }
+
+  .rail-group-label {
+    padding: 14px 24px 6px 24px;
+    font-size: 0.68rem;
+    color: var(--saffron-light);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+  }
+  @media (max-width: 900px) { .rail-group-label { display: none; } }
+
+  .rail a.step-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 24px;
+    text-decoration: none;
+    color: rgba(253,246,236,0.72);
+    font-size: 0.88rem;
+    border-left: 3px solid transparent;
+    transition: color .15s, border-color .15s, background .15s;
+  }
+  .rail a.step-link:hover { color: #fff; background: rgba(255,255,255,0.04); }
+  .rail a.step-link.active { color: #fff; border-left-color: var(--saffron); background: rgba(232,114,12,0.12); font-weight: 600; }
+
+  .rail .num {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: rgba(255,255,255,0.1);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.72rem; flex-shrink: 0;
+  }
+  .rail a.step-link.active .num { background: var(--saffron); color: var(--maroon-dark); }
+
+  @media (max-width: 900px) {
+    .rail a.step-link {
+      flex-direction: column;
+      gap: 4px;
+      padding: 6px 10px;
+      border-left: none;
+      border-bottom: 3px solid transparent;
+      font-size: 0.68rem;
+      text-align: center;
+    }
+    .rail a.step-link.active { border-left: none; border-bottom-color: var(--saffron); background: none; }
+  }
+
+  /* ---------- Main content ---------- */
+
+  main { padding: 0; max-width: 900px; }
+
+  section.slide {
+    padding: 64px 56px;
+    border-bottom: 1px solid var(--line);
+    scroll-margin-top: 150px;
+  }
+  @media (max-width: 900px) {
+    section.slide { padding: 40px 22px; scroll-margin-top: 20px; }
+  }
+  #g-mfa, #slack-intro, #done, #videos, #slack { scroll-margin-top: 150px; }
+  @media (max-width: 900px) {
+    #g-mfa, #slack-intro, #done, #videos, #slack { scroll-margin-top: 20px; }
+  }
+
+  /* ---------- Hero ---------- */
+
+  .hero {
+    background: var(--maroon);
+    color: #fff;
+    padding: 90px 56px 70px 56px;
+    position: relative;
+    overflow: hidden;
+  }
+  @media (max-width: 900px) { .hero { padding: 50px 22px 46px 22px; } }
+
+  .hero::before {
+    content: "";
+    position: absolute;
+    top: -120px; right: -140px;
+    width: 420px; height: 420px;
+    border-radius: 50%;
+    background: var(--maroon-bright);
+    opacity: 0.6;
+  }
+  .hero::after {
+    content: "";
+    position: absolute;
+    bottom: -160px; left: -100px;
+    width: 320px; height: 320px;
+    border-radius: 50%;
+    background: var(--saffron);
+    opacity: 0.18;
+  }
+
+  .hero-inner { position: relative; z-index: 1; max-width: 640px; }
+
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(255,255,255,0.1);
+    padding: 6px 14px;
+    border-radius: 100px;
+    font-size: 0.78rem;
+    margin-bottom: 26px;
+  }
+
+  .hero h1 {
+    font-family: var(--serif);
+    font-size: clamp(2rem, 4.4vw, 3.1rem);
+    line-height: 1.12;
+    margin: 0 0 18px 0;
+    font-weight: 700;
+  }
+
+  .hero p.lede {
+    font-size: 1.05rem;
+    color: rgba(253,246,236,0.85);
+    margin: 0 0 30px 0;
+    max-width: 480px;
+  }
+
+  .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 30px; }
+  .btn-act { display: inline-block; padding: 12px 26px; border-radius: 100px; font-weight: 700; font-size: 0.9rem; text-decoration: none; }
+  .btn-saffron { background: var(--saffron); color: #fff; }
+  .btn-white { background: #fff; color: var(--maroon); }
+
+  .hero-stats {
+    display: flex;
+    gap: 28px;
+    flex-wrap: wrap;
+  }
+  .hero-stats div { font-size: 0.85rem; color: rgba(253,246,236,0.75); display: flex; align-items: center; gap: 6px; padding-right: 4px; }
+  .hero-stats strong { color: #fff; font-weight: 700; margin-right: 2px; }
+
+  /* ---------- Eyebrow / heading system ---------- */
+
+  .part-marker {
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--saffron);
+    letter-spacing: 0.04em;
+    margin-bottom: 10px;
+  }
+
+  .step-head {
+    display: flex;
+    align-items: flex-start;
+    gap: 18px;
+    margin-bottom: 8px;
+  }
+
+  .step-badge {
+    flex-shrink: 0;
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    background: var(--maroon);
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--serif);
+    font-size: 1.5rem;
+    font-weight: 700;
+    border: 2px solid var(--saffron-light);
+  }
+
+  .step-head h2 {
+    font-family: var(--serif);
+    font-size: 1.7rem;
+    margin: 4px 0 0 0;
+    line-height: 1.2;
+  }
+  .step-of { font-size: 0.72rem; color: var(--ink-soft); font-weight: 700; letter-spacing: 0.03em; margin-bottom: 2px; display:block; }
+
+  .step-sub {
+    color: var(--ink-soft);
+    font-size: 0.95rem;
+    margin: 6px 0 30px 74px;
+    max-width: 60ch;
+  }
+  @media (max-width: 900px) {
+    .step-sub { margin-left: 0; }
+  }
+
+  h1.page-h, h2.section-h {
+    font-family: var(--serif);
+    font-size: 1.9rem;
+    margin: 0 0 8px 0;
+  }
+  .section-sub { color: var(--ink-soft); font-size: 0.95rem; margin: 0 0 30px 0; max-width: 60ch; }
+
+  /* ---------- Terminal / screenshot mock ---------- */
+
+  .term {
+    background: #1a1a1a;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.18);
+    margin-bottom: 18px;
+    position: relative;
+  }
+  .term-bar {
+    display: flex; align-items: center; gap: 7px;
+    padding: 10px 14px;
+    background: #262626;
+  }
+  .term-bar span { width: 11px; height: 11px; border-radius: 50%; display:block; }
+  .term-bar span:nth-child(1) { background: #FF5F56; }
+  .term-bar span:nth-child(2) { background: #FFBD2E; }
+  .term-bar span:nth-child(3) { background: #27C93F; }
+  .term-title { flex: 1; text-align: center; font-size: 0.72rem; color: #9a9a9a; font-family: var(--sans); margin-right: 44px; }
+  .term-body {
+    padding: 22px 20px 26px 20px;
+    font-family: var(--mono);
+    font-size: 0.88rem;
+    color: #e8e8e8;
+    line-height: 1.7;
+    overflow-x: auto;
+  }
+  .term-body .cmd::before { content: "PS C:\\Users\\You> "; color: #7a7a7a; }
+  .term-body .out { color: var(--saffron-light); }
+  .term-body .comment { color: #6b6b6b; }
+  .term-body .prompt-yellow { color: #F2C583; font-weight: 700; }
+  .copy-btn {
+    position: absolute; top: 44px; right: 10px;
+    background: var(--maroon); color: #fff; border: 1px solid var(--saffron);
+    font-family: var(--sans); font-size: 0.7rem; font-weight: 700;
+    padding: 5px 12px; border-radius: 100px; cursor: pointer;
+  }
+  .copy-btn:hover { background: var(--saffron); }
+
+  .browser-mock {
+    background: #fff;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+    border: 1px solid #e5ded2;
+    margin-bottom: 18px;
+  }
+  .browser-bar {
+    background: #f1ede4;
+    padding: 8px 14px;
+    display: flex; align-items: center; gap: 8px;
+    border-bottom: 1px solid #e5ded2;
+  }
+  .browser-bar .dot { width: 9px; height: 9px; border-radius: 50%; background: #d8d0c0; }
+  .url-pill {
+    flex: 1;
+    background: #fff;
+    border-radius: 100px;
+    padding: 4px 12px;
+    font-size: 0.75rem;
+    color: #8a7f6f;
+    margin-left: 6px;
+    border: 1px solid #e5ded2;
+  }
+  .browser-body { padding: 26px; }
+
+  .caption {
+    font-size: 0.82rem;
+    font-style: italic;
+    color: var(--ink-soft);
+    text-align: center;
+    margin: -6px 0 22px 0;
+  }
+
+  .shotfig { border: 1px solid #e5ded2; border-radius: 10px; overflow: hidden; margin-top: 16px; background: #fff; box-shadow: 0 10px 30px rgba(0,0,0,0.10); }
+  .shotfig img { width: 100%; display: block; }
+  .shotfig figcaption { font-size: 0.78rem; color: var(--ink-soft); padding: 8px 12px; border-top: 1px solid #e5ded2; display: flex; justify-content: space-between; gap: 8px; background: var(--ivory); }
+  .shotfig figcaption a { color: var(--saffron); font-weight: 700; }
+
+  /* ---------- Two-col grid ---------- */
+
+  .cols-2 {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 32px;
+    align-items: flex-start;
+  }
+  .cols-2 > * { flex: 1 1 320px; min-width: 0; }
+  @supports (display: grid) {
+    .cols-2 { display: grid; grid-template-columns: 1fr 1fr; }
+    @media (max-width: 780px) {
+      .cols-2 { grid-template-columns: 1fr; }
+    }
+  }
+
+  /* ---------- Ordered flow list (scannable) ---------- */
+
+  .flow { list-style: none; margin: 0; padding: 0; }
+  .flow li {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 11px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .flow li:last-child { border-bottom: none; }
+  .flow .n {
+    flex-shrink: 0;
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    background: var(--saffron);
+    color: #fff;
+    font-size: 0.85rem;
+    font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .flow .txt { font-size: 0.92rem; padding-top: 2px; }
+  .flow .txt b { display: block; font-size: 0.94rem; }
+  .flow .txt small { color: var(--ink-soft); font-size: 0.8rem; }
+
+  /* ---------- Card grid (for overview / recap) ---------- */
+
+  .card-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-top: 24px;
+  }
+  .card-grid .mini-card { flex: 1 1 220px; }
+  @supports (display: grid) {
+    .card-grid { display: grid; grid-template-columns: repeat(3, 1fr); }
+    @media (max-width: 780px) { .card-grid { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 480px) { .card-grid { grid-template-columns: 1fr; } }
+  }
+
+  .mini-card {
+    background: var(--cream);
+    border-radius: 12px;
+    padding: 20px 18px;
+    position: relative;
+  }
+  .mini-card .num-tag {
+    position: absolute; top: 14px; right: 16px;
+    font-family: var(--serif);
+    font-weight: 700;
+    color: rgba(74,20,20,0.28);
+    font-size: 1.1rem;
+  }
+  .mini-card .icon { font-size: 1.5rem; margin-bottom: 10px; display: block; }
+  .mini-card b { display: block; font-size: 0.95rem; margin-bottom: 3px; }
+  .mini-card span.detail { font-size: 0.8rem; color: var(--ink-soft); }
+
+  /* ---------- Callout box ---------- */
+
+  .callout {
+    background: var(--maroon-dark);
+    color: var(--cream);
+    border-radius: 12px;
+    padding: 22px 24px;
+  }
+  .callout b { color: #fff; display: block; margin-bottom: 8px; font-size: 0.95rem; }
+  .callout p { margin: 0; font-size: 0.88rem; line-height: 1.55; color: rgba(247,231,198,0.9); }
+  .callout.warn { background: var(--cream); color: var(--maroon-dark); }
+  .callout.warn b { color: var(--maroon); }
+  .callout.warn p { color: rgba(74,20,20,0.85); }
+  .callout.accent { background: var(--saffron); color: var(--maroon-dark); }
+  .callout.accent b { color: var(--maroon-dark); }
+  .callout.accent p { color: var(--maroon-dark); }
+  .callout.accent kbd, .callout.accent .kbd-hi { background: #fff; color: var(--maroon-dark); border-color: #fff; }
+  .callout.warn kbd { background: #fff; }
+  .callout kbd { border-color: rgba(0,0,0,0.12); }
+
+  .tip-row { display: flex; gap: 12px; align-items: flex-start; margin-top: 14px; }
+  .tip-row .emoji { font-size: 1.1rem; }
+  .tip-row p { margin: 0; font-size: 0.85rem; color: var(--ink-soft); }
+
+  /* ---------- Pill / badge chips ---------- */
+
+  .chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--cream);
+    padding: 5px 12px;
+    border-radius: 100px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--maroon);
+    margin-bottom: 10px;
+  }
+
+  /* ---------- Highlighted links, keys, shortcuts ---------- */
+
+  .key { display: inline-flex; align-items: center; gap: 6px; background: var(--saffron); color: #fff !important; padding: 6px 14px; border-radius: 100px; font-weight: 700; font-size: 0.82rem; text-decoration: none; }
+  .key:hover { text-decoration: none; }
+  .link-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+  kbd { font-family: var(--mono); font-size: 0.78em; background: var(--cream); border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 6px; padding: 1px 7px; white-space: nowrap; }
+  .kbd-hi { background: var(--maroon); color: #fff; border-color: var(--maroon); }
+  .help-row { margin-top: 18px; padding: 12px 14px; border: 1px dashed var(--line); border-radius: 10px; font-size: 0.8rem; color: var(--ink-soft); display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .help-btn { background: var(--maroon-dark); color: #fff !important; padding: 6px 14px; border-radius: 100px; font-weight: 700; text-decoration: none; font-size: 0.78rem; }
+
+  /* ---------- App/API list ---------- */
+
+  .app-list { display: flex; flex-direction: column; gap: 10px; }
+  a.app-row {
+    display: flex; align-items: center; gap: 14px;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 12px 16px;
+    text-decoration: none;
+  }
+  a.app-row:hover { border-color: var(--saffron); }
+  .app-row .swatch {
+    width: 34px; height: 34px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem; flex-shrink: 0; color: #fff;
+  }
+  .app-row b { font-size: 0.9rem; display: block; }
+  .app-row span { font-size: 0.78rem; color: var(--ink-soft); }
+
+  /* ---------- Cheat sheet code block ---------- */
+
+  .cheat-term .term-body div { margin-bottom: 4px; }
+
+  /* ---------- Footer note ---------- */
+
+  .foot-tag {
+    font-size: 0.78rem;
+    color: var(--ink-soft);
+    margin-top: 10px;
+  }
+
+  /* ---------- Divider for Part Two ---------- */
+
+  .part-hero {
+    background: var(--maroon-dark);
+    color: #fff;
+    padding: 70px 56px;
+    position: relative;
+    overflow: hidden;
+  }
+  @media (max-width: 900px) { .part-hero { padding: 44px 22px; } }
+  .part-hero::before {
+    content: "";
+    position: absolute; top: -80px; right: -80px;
+    width: 300px; height: 300px; border-radius: 50%;
+    background: var(--maroon-bright); opacity: 0.5;
+  }
+  .part-hero-inner { position: relative; z-index: 1; }
+  .part-hero h2 { font-family: var(--serif); font-size: 2rem; margin: 6px 0 14px 0; }
+  .part-hero p { color: rgba(253,246,236,0.82); max-width: 56ch; font-size: 0.95rem; margin: 0 0 26px 0; }
+  .part-hero .part-marker { color: var(--saffron-light); }
+  .part-hero .mini-card b { color: var(--maroon-dark); }
+  .part-hero .mini-card span.detail { color: var(--ink-soft); }
+
+  .g-icon {
+    width: 44px; height: 44px;
+    border-radius: 10px;
+    background: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--serif);
+    font-weight: 700;
+    font-size: 1.4rem;
+    color: #4285F4;
+    margin-bottom: 18px;
+  }
+
+  .band {
+    background: var(--maroon-dark);
+    color: #fff;
+    border-radius: 14px;
+    padding: 34px 30px;
+    margin: 0;
+    scroll-margin-top: 150px;
+    position: relative;
+    overflow: hidden;
+  }
+  @media (max-width: 900px) { .band { scroll-margin-top: 20px; } }
+  .band .part-marker { color: var(--saffron-light); }
+  .band h2 { font-family: var(--serif); font-size: 1.7rem; margin: 6px 0 10px 0; }
+  .band p { color: rgba(253,246,236,0.82); font-size: 0.92rem; max-width: 60ch; margin: 0 0 8px 0; }
+  .band .flow li { border-color: rgba(255,255,255,0.14); }
+  #slack-intro, #done, #videos, #slack { scroll-margin-top: 150px; }
+  @media (max-width: 900px) { #slack-intro, #done, #videos, #slack { scroll-margin-top: 20px; } }
+
+  /* ---------- Final CTA ---------- */
+
+  .final-cta {
+    background: var(--maroon);
+    color: #fff;
+    text-align: center;
+    padding: 80px 40px;
+  }
+  .final-cta h2 { font-family: var(--serif); font-size: 2rem; margin: 0 0 12px 0; }
+  .final-cta p { color: rgba(253,246,236,0.82); margin: 0 0 26px 0; }
+  .final-cta a.btn {
+    display: inline-block;
+    background: var(--saffron);
+    color: #fff;
+    text-decoration: none;
+    padding: 13px 30px;
+    border-radius: 100px;
+    font-weight: 700;
+    font-size: 0.92rem;
+  }
+
+  /* ---------- Footer ---------- */
+
+  .footer { background: var(--maroon-dark); color: var(--cream); padding: 40px 30px 24px; border-top: 4px solid var(--saffron); }
+  .footer-inner { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: 1.3fr 0.8fr 0.8fr 1fr; gap: 20px; }
+  @media (max-width: 780px) { .footer-inner { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 480px) { .footer-inner { grid-template-columns: 1fr; } }
+  .footer h4 { font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--saffron-light); margin: 0 0 10px 0; }
+  .footer a { color: var(--cream); font-size: 0.82rem; display: block; margin-bottom: 7px; opacity: 0.85; text-decoration: none; }
+  .footer a:hover { opacity: 1; }
+  .footer p { font-size: 0.78rem; color: rgba(247,231,198,0.7); }
+  .footer-bottom { max-width: 1100px; margin: 0 auto; padding: 14px 0 0 0; border-top: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; font-size: 0.72rem; color: rgba(247,231,198,0.6); }
+
+  /* ---------- Utility ---------- */
+  .mt0 { margin-top: 0; }
+  code.inline {
+    background: var(--cream);
+    padding: 2px 7px;
+    border-radius: 5px;
+    font-family: var(--mono);
+    font-size: 0.85em;
+  }
+
+  ::selection { background: var(--saffron-light); color: var(--maroon-dark); }
+
+  .logotext { position: absolute; left: 22px; top: 50%; transform: translateY(-50%); z-index: 2; color: var(--maroon); font-family: var(--serif); font-weight: 700; font-size: 1.05rem; line-height: 1.1; }
+  .logotext span { display: block; font-family: var(--sans); font-weight: 400; font-size: 0.68rem; opacity: 0.85; letter-spacing: 0.04em; }
+
+  main > section.slide:nth-of-type(even) { background: #fff; }
+</style>
+</head>
+<body>
+
+<header class="ghead">
+  <div class="logotext">n8n Setup Guide<span>Windows - Local install</span></div>
+  <nav class="gnav">
+    <a href="#s-ready">Start</a>
+    <a href="#s1">Install</a>
+    <a href="#g0">Google</a>
+    <a href="#slack">Slack</a>
+    <a href="#videos">Videos</a>
+    <a href="https://nodejs.org/en/download" target="_blank" class="dl">Download</a>
+  </nav>
+</header>
+
+<div class="shell">
+
+  <!-- ================= SIDEBAR / STEP TRACKER ================= -->
+  <nav class="rail" id="rail">
+    <div class="rail-brand">n8n Setup Guide<span>Windows · Local install</span></div>
+
+    <div class="rail-group-label">Part One — Install</div>
+    <a class="step-link" data-target="s-ready"><span class="num">•</span> Get ready</a>
+    <a class="step-link" data-target="s1"><span class="num">1</span> Install Node.js</a>
+    <a class="step-link" data-target="s2"><span class="num">2</span> Verify + Allow scripts</a>
+    <a class="step-link" data-target="s4"><span class="num">3</span> Install n8n</a>
+    <a class="step-link" data-target="s5"><span class="num">4</span> Run n8n</a>
+    <a class="step-link" data-target="s6"><span class="num">5</span> Restart &amp; verify</a>
+    <a class="step-link" data-target="s-trouble"><span class="num">?</span> Troubleshooting</a>
+    <a class="step-link" data-target="s-recap1"><span class="num">✓</span> Cheat sheet</a>
+
+    <div class="rail-group-label">Part Two — Google</div>
+    <a class="step-link" data-target="g0"><span class="num">•</span> Overview</a>
+    <a class="step-link" data-target="g1"><span class="num">1</span> Cloud project</a>
+    <a class="step-link" data-target="g2"><span class="num">2</span> Enable APIs</a>
+    <a class="step-link" data-target="g3"><span class="num">3</span> Consent screen</a>
+    <a class="step-link" data-target="g4"><span class="num">4</span> Test user</a>
+    <a class="step-link" data-target="g5"><span class="num">5</span> Credentials</a>
+    <a class="step-link" data-target="g6"><span class="num">6</span> Save &amp; connect</a>
+    <a class="step-link" data-target="g-recap"><span class="num">✓</span> Cheat sheet</a>
+
+    <div class="rail-group-label">Optional</div>
+    <a class="step-link" data-target="slack"><span class="num">◈</span> Slack setup</a>
+    <a class="step-link" data-target="videos"><span class="num">▶</span> Videos</a>
+  </nav>
+
+  <!-- ================= MAIN CONTENT ================= -->
+  <main>
+
+    <!-- HERO -->
+    <header class="hero" id="top">
+      <div class="hero-inner">
+        <div class="hero-badge">⌘ Windows edition · no coding needed</div>
+        <h1>Run n8n on your own computer</h1>
+        <p class="lede">A click-by-click guide to installing n8n locally — free, private, and yours to keep. No experience required.</p>
+        <div class="hero-actions">
+          <a href="#s1" class="btn-act btn-saffron">Start — Step 1</a>
+          <a href="https://nodejs.org/en/download" target="_blank" class="btn-act btn-white">Download Node.js</a>
+        </div>
+        <div class="hero-stats">
+          <div><strong>~15 min</strong> total time</div>
+          <div><strong>Free</strong> &amp; open-source</div>
+          <div><strong>12 steps</strong> start to finish</div>
+        </div>
+      </div>
+    </header>
+
+    <!-- OVERVIEW -->
+    <section class="slide" id="s-ready">
+      <span class="chip">Before you start</span>
+      <h1 class="page-h">What you need</h1>
+      <p class="section-sub">Four things. That's it.</p>
+
+      <div class="card-grid">
+        <div class="mini-card"><span class="icon">🖥️</span><b>A Windows PC</b><span class="detail">Uses built-in PowerShell</span></div>
+        <div class="mini-card"><span class="icon">🌐</span><b>Internet</b><span class="detail">Two small downloads</span></div>
+        <div class="mini-card"><span class="icon">⏱️</span><b>15 minutes</b><span class="detail">Mostly waiting</span></div>
+        <div class="mini-card"><span class="icon">🔑</span><b>Admin rights</b><span class="detail">Right-click → Run as admin</span></div>
+      </div>
+
+      <div class="tip-row" style="margin-top:28px;">
+        <span class="emoji">💡</span>
+        <p><b style="color:var(--ink);">What is Node.js?</b> A program that runs n8n. Installing it also installs <code class="inline">npm</code>, which installs n8n.</p>
+      </div>
+    </section>
+
+    <!-- STEP 1 -->
+    <section class="slide" id="s1">
+      <div class="step-head">
+        <div class="step-badge">1</div>
+        <div><span class="step-of">STEP 1 OF 5</span><h2>Install Node.js</h2></div>
+      </div>
+      <p class="step-sub">The engine n8n runs on.</p>
+
+      <div class="cols-2">
+        <div>
+          
+          
+          <div class="shotfig">
+            <img src="screenshots/shot-nodejs-home.png" alt="Real photo of the nodejs.org homepage">
+            <figcaption><span>Real photo — click Downloads, then pick LTS on the next page</span><a href="https://nodejs.org/en/download" target="_blank">Open →</a></figcaption>
+          </div>
+          <div class="link-row">
+            <a class="key" href="https://nodejs.org/en/download" target="_blank">⬇ Download page</a>
+            <a class="key" style="background:var(--maroon);" href="https://nodejs.org/dist/v24.20.0/node-v24.20.0-x64.msi" target="_blank">Direct MSI</a>
+          </div>
+        </div>
+        <ul class="flow">
+          <li><span class="n">1</span><span class="txt">Go to <a class="key" href="https://nodejs.org/en/download" target="_blank">nodejs.org</a></span></li>
+          <li><span class="n">2</span><span class="txt">Click <b>LTS</b> version <small>(skip "Current")</small></span></li>
+          <li><span class="n">3</span><span class="txt">Open the downloaded <code class="inline">.msi</code></span></li>
+          <li><span class="n">4</span><span class="txt">Click Next → Next → Finish</span></li>
+          <li><span class="n">5</span><span class="txt">Done — npm installed too</span></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- STEP 2 (Verify + Allow merged — compulsory) -->
+    <section class="slide" id="s2">
+      <div class="step-head">
+        <div class="step-badge">2</div>
+        <div><span class="step-of">STEP 2 OF 5 · COMPULSORY</span><h2>Verify + Allow scripts</h2></div>
+      </div>
+      <p class="step-sub">Confirm the install, then give the one-time permission npm needs. Without it, <code class="inline">npm -v</code> fails on most PCs.</p><div class="cols-2">
+        <div class="term">
+          <div class="term-bar"><span></span><span></span><span></span><div class="term-title">Windows PowerShell</div></div>
+          <div class="term-body">
+            <div class="cmd">node -v</div>
+            <div class="out">v24.20.0</div>
+            <div class="cmd">npm -v</div>
+            <div class="out">12.0.2</div>
+          </div>
+          <button class="copy-btn" onclick="navigator.clipboard.writeText('node -v')">Copy</button>
+        </div>
+        <ul class="flow">
+          <li><span class="n">1</span><span class="txt">Press <kbd>Win</kbd> + <kbd>X</kbd></span></li>
+          <li><span class="n">2</span><span class="txt">Choose PowerShell</span></li>
+          <li><span class="n">3</span><span class="txt">Type <code class="inline">node -v</code> → <kbd>Enter</kbd></span></li>
+          <li><span class="n">4</span><span class="txt">Type <code class="inline">npm -v</code> → <kbd>Enter</kbd></span></li>
+        </ul>
+      </div><div class="callout warn" style="margin-top:22px;">
+        <b>See "not recognized"?</b>
+        <p>Close PowerShell, reopen it, try again — Windows needs a fresh window sometimes.</p>
+      </div><div class="term" style="margin-top:22px;">
+        <div class="term-bar"><span></span><span></span><span></span><div class="term-title">Windows PowerShell (Administrator) — compulsory</div></div>
+        <div class="term-body">
+          <div class="cmd">Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser</div>
+          <div class="prompt-yellow" style="margin-top:10px;">Execution Policy Change</div>
+          <div>Do you want to change the execution policy?</div>
+          <div>[Y] Yes  [N] No  [S] Suspend (default is "N"): <b style="color:#fff;">Y</b></div>
+        </div>
+        <button class="copy-btn" onclick="navigator.clipboard.writeText('Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser')">Copy</button>
+      </div>
+
+      
+      
+
+      
+
+      <div class="cols-2" style="margin-top:20px;">
+        <div class="callout">
+          <b>Why</b>
+          <p>Windows blocks scripts by default. This unlocks npm's tools safely — one time only.</p>
+        </div>
+        <div class="callout accent">
+          <b>How</b>
+          <p>Right-click PowerShell → <b>Run as administrator</b> first. Type <kbd class="kbd-hi">Y</kbd>, hit <kbd>Enter</kbd>.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- STEP 4 -->
+    <section class="slide" id="s4">
+      <div class="step-head">
+        <div class="step-badge">3</div>
+        <div><span class="step-of">STEP 3 OF 5</span><h2>Install n8n</h2></div>
+      </div>
+      <p class="step-sub">One command does it all. <a href="https://docs.n8n.io/deploy/host-n8n/install-options/install-with-npm" target="_blank">Same line in official docs</a>.</p>
+
+      <div class="shotfig">
+        <img src="screenshots/shot-n8n-docs.png" alt="Real photo of the official n8n npm install docs">
+        <figcaption><span>Real photo — official docs, same command</span><a href="https://docs.n8n.io/deploy/host-n8n/install-options/install-with-npm" target="_blank">Open →</a></figcaption>
+      </div>
+
+      <div class="term">
+        <div class="term-bar"><span></span><span></span><span></span><div class="term-title">Windows PowerShell</div></div>
+        <div class="term-body"><div class="cmd">npm install -g n8n</div></div>
+        <button class="copy-btn" onclick="navigator.clipboard.writeText('npm install -g n8n')">Copy</button>
+      </div>
+
+      
+
+      <div class="card-grid" style="grid-template-columns: repeat(3,1fr); margin-top:20px;">
+        <div class="mini-card"><span class="icon">🌍</span><b>-g = global</b><span class="detail">Works from any folder</span></div>
+        <div class="mini-card"><span class="icon">⏳</span><b>1–3 minutes</b><span class="detail">Bar will scroll by</span></div>
+        <div class="mini-card"><span class="icon">✅</span><b>Prompt returns</b><span class="detail">= it worked</span></div>
+      </div>
+    </section>
+
+    <!-- STEP 5 -->
+    <section class="slide" id="s5">
+      <div class="step-head">
+        <div class="step-badge">4</div>
+        <div><span class="step-of">STEP 4 OF 5</span><h2>Run n8n locally</h2></div>
+      </div>
+      <p class="step-sub">Two ways — pick one.</p>
+
+      <div class="cols-2">
+        <div>
+          <div class="term" style="margin-bottom:14px;">
+            <div class="term-bar"><span></span><span></span><span></span><div class="term-title">Option A — installed</div></div>
+            <div class="term-body"><div class="cmd">n8n</div></div>
+            <button class="copy-btn" onclick="navigator.clipboard.writeText('n8n')">Copy</button>
+          </div>
+          <div class="term">
+            <div class="term-bar"><span></span><span></span><span></span><div class="term-title">Option B — quick try, no install</div></div>
+            <div class="term-body"><div class="cmd">npx n8n</div></div>
+            <button class="copy-btn" onclick="navigator.clipboard.writeText('npx n8n')">Copy</button>
+          </div>
+          <div class="link-row"><a class="key" href="http://localhost:5678" target="_blank">Open localhost:5678</a></div>
+        </div>
+        <div class="browser-mock" style="height:100%;">
+          <div class="browser-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><div class="url-pill">localhost:5678</div></div>
+          <div class="browser-body" style="text-align:center; padding:40px 20px;">
+            <div style="font-size:2.4rem; margin-bottom:10px;">🚀</div>
+            <div style="font-family:var(--serif); font-weight:700; font-size:1.2rem; margin-bottom:8px;">n8n is running!</div>
+            <div style="font-size:0.85rem; color:var(--ink-soft);">Open <code class="inline">localhost:5678</code> to finish setup.</div>
+          </div>
+        </div>
+      </div>
+      <p class="foot-tag">⚠️ Keep the PowerShell window open — closing it stops n8n.</p>
+    </section>
+
+    <!-- STEP 6 -->
+    <section class="slide" id="s6">
+      <div class="step-head">
+        <div class="step-badge">5</div>
+        <div><span class="step-of">STEP 5 OF 5</span><h2>Restart &amp; double-check</h2></div>
+      </div>
+      <p class="step-sub">The real test — does it survive a reboot?</p>
+
+      <ul class="flow">
+        <li><span class="n">1</span><span class="txt">Press <code class="inline">Ctrl + C</code> in n8n's window</span></li>
+        <li><span class="n">2</span><span class="txt">Close PowerShell completely</span></li>
+        <li><span class="n">3</span><span class="txt">Reopen PowerShell</span></li>
+        <li><span class="n">4</span><span class="txt">Type the same launch command</span></li>
+        <li><span class="n">5</span><span class="txt">Open <code class="inline">localhost:5678</code> again</span></li>
+      </ul>
+      <div class="callout accent" style="margin-top:20px;">
+        <b>Success looks like</b>
+        <p>The same message every time. No red error text.</p>
+      </div>
+    </section>
+
+    <!-- TROUBLESHOOTING -->
+    <section class="slide" id="s-trouble">
+      <span class="chip">If something's off</span>
+      <h1 class="page-h">Troubleshooting</h1>
+      <div class="card-grid">
+        <div class="mini-card"><b>"npm not recognized"</b><span class="detail">Reopen PowerShell fresh</span></div>
+        <div class="mini-card"><b>Scripts disabled</b><span class="detail">Re-run Step 2 as admin</span></div>
+        <div class="mini-card"><b>Port already in use</b><span class="detail">Another n8n is running</span></div>
+        <div class="mini-card"><b>Node version issue</b><span class="detail">Needs v20.19–24</span></div>
+      </div>
+      <div class="callout" style="margin-top:22px;">
+        <b>Still stuck?</b>
+        <p>Paste the exact error into ChatGPT or Claude — fastest fix for one-off errors. Or search YouTube: "install n8n locally Windows npm".</p>
+      </div>
+    </section>
+
+    <!-- RECAP 1 -->
+    <section class="slide" id="s-recap1">
+      <span class="chip">✓ Done</span>
+      <h1 class="page-h">Your cheat sheet</h1>
+      <p class="section-sub">Every command, copy-paste ready.</p>
+      <div class="term cheat-term">
+        <div class="term-bar"><span></span><span></span><span></span><div class="term-title">Full setup</div></div>
+        <div class="term-body">
+          <div class="cmd">node -v</div>
+          <div class="cmd">npm -v</div>
+          <div class="cmd">Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser</div>
+          <div class="cmd">npm install -g n8n</div>
+          <div class="cmd">n8n</div>
+          <div class="comment"># then visit localhost:5678</div>
+        </div>
+        <button class="copy-btn" onclick="navigator.clipboard.writeText('node -v\nnpm -v\nSet-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser\nnpm install -g n8n\nn8n')">Copy all</button>
+      </div>
+      <div class="callout accent" style="margin-top:18px;">
+        <b>Next time</b>
+        <p>Open PowerShell → type <code class="inline" style="background:rgba(255,255,255,0.4);">n8n</code> → visit localhost:5678. That's it.</p>
+      </div>
+    </section>
+
+    <!-- ============ MFA BAND ============ -->
+    <div class="band" id="g-mfa">
+      <span class="part-marker">Must do first — 1 minute</span>
+      <h2>Turn 2-Step Verification (2SV) ON — keep the tab open</h2>
+      <p>Google stops new work if 2-Step Verification is OFF. Turn it ON now, keep the tab open through all Google steps below. When you are done, you may turn it OFF again from the same page.</p>
+      <ul class="flow" style="max-width:560px; margin-top:14px;">
+        <li><span class="n">1</span><span class="txt"><b>Open the 2-Step Verification page</b> <a class="key" href="https://myaccount.google.com/signinoptions/two-step-verification" target="_blank">Turn ON page</a></span></li>
+        <li><span class="n">2</span><span class="txt"><b>Click TURN ON → Done → DO NOT CLOSE this tab</b></span></li>
+      </ul>
+    </div>
+
+    <!-- ============ PART TWO ============ -->
+    <div class="part-hero" id="g0">
+      <div class="part-hero-inner">
+        <div class="g-icon">G</div>
+        <span class="part-marker">Part Two</span>
+        <h2>Connecting Google apps to n8n</h2>
+        <p>Let n8n read Gmail, edit Sheets, manage Calendar. Six steps, once per project. <a class="key" href="https://console.cloud.google.com/" target="_blank">Open Console</a></p>
+        <div class="card-grid" style="grid-template-columns: repeat(3,1fr);">
+          <div class="mini-card"><span class="num-tag">1</span><b>Cloud project</b><span class="detail">Free, no billing</span></div>
+          <div class="mini-card"><span class="num-tag">2</span><b>Enable APIs</b><span class="detail">Gmail, Sheets, Drive…</span></div>
+          <div class="mini-card"><span class="num-tag">3</span><b>Consent screen</b><span class="detail">Name your app</span></div>
+          <div class="mini-card"><span class="num-tag">4</span><b>Test user</b><span class="detail">Add your Gmail</span></div>
+          <div class="mini-card"><span class="num-tag">5</span><b>Credentials</b><span class="detail">Client ID + Secret</span></div>
+          <div class="mini-card"><span class="num-tag">6</span><b>Paste into n8n</b><span class="detail">Every Google node</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- G STEP 1 -->
+    <section class="slide" id="g1">
+      <div class="step-head">
+        <div class="step-badge">1</div>
+        <div><span class="step-of">STEP 1 OF 6</span><h2>Create your Cloud project</h2></div>
+      </div>
+      <p class="step-sub">Free. Stays free for local n8n use.</p>
+      <ul class="flow">
+        <li><span class="n">1</span><span class="txt">Go to <a class="key" href="https://console.cloud.google.com/" target="_blank">console.cloud.google.com</a></span></li>
+        <li><span class="n">2</span><span class="txt">Sign in with any Google account (or sign up free)</span></li>
+        <li><span class="n">3</span><span class="txt"><b>If Google asks for money or card — SKIP it.</b> <small>Erase that page. Just open console.cloud.google.com. Home n8n needs NO billing.</small></span></li>
+        <li><span class="n">4</span><span class="txt">Click project dropdown (top bar) → <a href="https://console.cloud.google.com/projectcreate" target="_blank"><b>New Project</b></a></span></li>
+        <li><span class="n">5</span><span class="txt">Name it → Create → wait 10 sec → click it</span></li>
+      </ul>
+      <div class="callout accent" style="margin-top:20px;">
+        <b>No payment needed</b>
+        <p>If you see “billing” or “free trial”, close it. A free project is enough for this whole guide.</p>
+      </div>
+      <div class="callout warn" style="margin-top:14px;">
+        <b>See "Access blocked"?</b>
+        <p>Google needs 2-step verification on your account first. Turn it ON in the band above, then refresh. One-time, per account.</p>
+      </div>
+    </section>
+
+    <!-- G STEP 2 -->
+    <section class="slide" id="g2">
+      <div class="step-head">
+        <div class="step-badge">2</div>
+        <div><span class="step-of">STEP 2 OF 6</span><h2>Enable the Google APIs</h2></div>
+      </div>
+      <p class="step-sub">Once per app, per project. Enable ALL the apps n8n will use — do them one by one, same way every time.</p>
+
+      <div class="cols-2">
+        <ul class="flow">
+          <li><span class="n">1</span><span class="txt">☰ menu → APIs &amp; Services → <a class="key" href="https://console.cloud.google.com/apis/library" target="_blank">Library</a></span></li>
+          <li><span class="n">2</span><span class="txt">Search the API name in the top search box</span></li>
+          <li><span class="n">3</span><span class="txt">Click result → <b>Enable</b> (blue button)</span></li>
+          <li><span class="n">4</span><span class="txt">Back to Library → repeat for each app below</span></li>
+        </ul>
+        <div class="app-list">
+          <a class="app-row" href="https://console.cloud.google.com/apis/library/gmail.googleapis.com" target="_blank"><div class="swatch" style="background:#EA4335;">✉️</div><div><b>Gmail API → Enable</b><span>Read, send &amp; label</span></div></a>
+          <a class="app-row" href="https://console.cloud.google.com/apis/library/sheets.googleapis.com" target="_blank"><div class="swatch" style="background:#0F9D58;">▦</div><div><b>Sheets API → Enable</b><span>Read/write rows</span></div></a>
+          <a class="app-row" href="https://console.cloud.google.com/apis/library/drive.googleapis.com" target="_blank"><div class="swatch" style="background:#4285F4;">▲</div><div><b>Drive API → Enable</b><span>Upload &amp; manage files</span></div></a>
+          <a class="app-row" href="https://console.cloud.google.com/apis/library/calendar-json.googleapis.com" target="_blank"><div class="swatch" style="background:#8B1E1E;">31</div><div><b>Calendar API → Enable</b><span>Create &amp; update events</span></div></a>
+        </div>
+      </div>
+    </section>
+
+    <!-- G STEP 3 -->
+    <section class="slide" id="g3">
+      <div class="step-head">
+        <div class="step-badge">3</div>
+        <div><span class="step-of">STEP 3 OF 6</span><h2>Set up the consent screen</h2></div>
+      </div>
+      <p class="step-sub">Google needs to know your app's name.</p>
+      <ul class="flow">
+        <li><span class="n">1</span><span class="txt">Sidebar → <a class="key" href="https://console.cloud.google.com/apis/credentials/consent" target="_blank">OAuth consent screen</a></span></li>
+        <li><span class="n">2</span><span class="txt">App name — anything, e.g. "My n8n Automations"</span></li>
+        <li><span class="n">3</span><span class="txt">Pick your support email</span></li>
+        <li><span class="n">4</span><span class="txt">Next → Next → choose <b>External</b> → Finish</span></li>
+      </ul>
+    </section>
+
+    <!-- G STEP 4 -->
+    <section class="slide" id="g4">
+      <div class="step-head">
+        <div class="step-badge">4</div>
+        <div><span class="step-of">STEP 4 OF 6</span><h2>Add yourself as a test user</h2></div>
+      </div>
+      <p class="step-sub">Required while your app is in "Testing" mode.</p>
+
+      <div class="cols-2">
+        <div class="browser-mock">
+          <div class="browser-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><div class="url-pill">OAuth consent → Audience</div></div>
+          <div class="browser-body">
+            <div style="font-size:0.8rem; font-weight:700; margin-bottom:6px;">Publishing status</div>
+            <div style="display:inline-block; background:var(--cream-deep); color:var(--maroon-dark); font-weight:700; font-size:0.78rem; padding:5px 14px; border-radius:100px; margin-bottom:18px;">Testing</div>
+            <div style="font-size:0.8rem; font-weight:700; margin-bottom:8px;">Test users</div>
+            <div style="display:inline-block; background:#1a73e8; color:#fff; font-size:0.72rem; font-weight:700; padding:8px 14px; border-radius:6px; margin-bottom:10px;">+ ADD USERS</div>
+            <div style="background:#f8f8f6; border:1px solid #e5ded2; border-radius:6px; padding:10px 12px; font-size:0.82rem; color:#333;">you@gmail.com</div>
+          </div>
+        </div>
+        <ul class="flow">
+          <li><span class="n">1</span><span class="txt">Consent screen → <a href="https://console.cloud.google.com/apis/credentials/consent" target="_blank"><b>Audience</b></a> tab</span></li>
+          <li><span class="n">2</span><span class="txt">Find <b>Test users</b> → "+ Add users"</span></li>
+          <li><span class="n">3</span><span class="txt">Type the Gmail you'll use in n8n</span></li>
+          <li><span class="n">4</span><span class="txt">Save</span></li>
+        </ul>
+      </div>
+      <div class="callout warn" style="margin-top:20px;">
+        <b>Don't skip this</b>
+        <p>Skip it, and n8n's Google sign-in shows "Access blocked" later.</p>
+      </div>
+    </section>
+
+    <!-- G STEP 5 -->
+    <section class="slide" id="g5">
+      <div class="step-head">
+        <div class="step-badge">5</div>
+        <div><span class="step-of">STEP 5 OF 6</span><h2>Create OAuth credentials</h2></div>
+      </div>
+      <p class="step-sub">This generates your Client ID &amp; Secret — the same pair you will reuse in every Google node.</p>
+
+      <div class="cols-2">
+        <ul class="flow">
+          <li><span class="n">1</span><span class="txt">Click "Get started" to finish setup</span></li>
+          <li><span class="n">2</span><span class="txt">Sidebar → <a class="key" href="https://console.cloud.google.com/apis/credentials" target="_blank">Credentials</a></span></li>
+          <li><span class="n">3</span><span class="txt">"+ Create Credentials"</span></li>
+          <li><span class="n">4</span><span class="txt">Choose <b>OAuth client ID</b></span></li>
+          <li><span class="n">5</span><span class="txt">Application type → <b>Web application</b></span></li>
+        </ul>
+        <div class="callout accent">
+          <b>One more field</b>
+          <p>Under "Authorized redirect URIs," paste the exact URL n8n shows you — get it from inside an n8n Google node's credential box first.</p>
+        </div>
+      </div>
+
+      <div class="term" style="margin-top:20px;">
+        <div class="term-bar"><span></span><span></span><span></span><div class="term-title">Where to find the redirect URL — in n8n</div></div>
+        <div class="term-body">
+          <div>Open n8n → add a Google node → "Connect to Gmail"</div>
+          <div class="out">http://localhost:5678/rest/oauth2-credential/callback</div>
+          <div class="comment"># copy this exact URL into Google Cloud Console</div>
+        </div>
+        <button class="copy-btn" onclick="navigator.clipboard.writeText('http://localhost:5678/rest/oauth2-credential/callback')">Copy URL</button>
+      </div>
+    </section>
+
+    <!-- G STEP 6 -->
+    <section class="slide" id="g6">
+      <div class="step-head">
+        <div class="step-badge">6</div>
+        <div><span class="step-of">STEP 6 OF 6</span><h2>Save your credentials</h2></div>
+      </div>
+      <p class="step-sub">You'll reuse this pair everywhere. Save it now — example: you set up Gmail today, tomorrow a Sheets node asks to connect → paste the SAME Client ID + Secret there.</p>
+
+      <div class="cols-2">
+        <div class="callout">
+          <b>After clicking Create</b>
+          <p>Google shows your Client ID &amp; Client Secret. Copy both into a notes app or password manager now — the Secret may need regenerating if lost. You will paste this same pair into Gmail, Sheets, Drive, Calendar — every Google node.</p>
+        </div>
+        <ul class="flow">
+          <li><span class="n">1</span><span class="txt">Add a Gmail node → "Connect to Gmail"</span></li>
+          <li><span class="n">2</span><span class="txt">Paste Client ID</span></li>
+          <li><span class="n">3</span><span class="txt">Paste Client Secret</span></li>
+          <li><span class="n">4</span><span class="txt">Sign in with Google → approve</span></li>
+        </ul>
+      </div>
+      <p class="foot-tag">🔁 Same Client ID &amp; Secret go into every Google node — Sheets, Gmail, Drive, Calendar…</p>
+    </section>
+
+    <!-- G RECAP -->
+    <section class="slide" id="g-recap">
+      <span class="chip">✓ Fully connected</span>
+      <h1 class="page-h">Google setup cheat sheet</h1>
+
+      <div class="cols-2">
+        <div>
+          <div class="mini-card" style="margin-bottom:12px;">
+            <span class="num-tag">1</span>
+            <b>Set up</b>
+            <span class="detail">Sign in → skip billing → New Project → Create</span>
+          </div>
+          <div class="mini-card" style="margin-bottom:12px;">
+            <span class="num-tag">2</span>
+            <b>Enable &amp; configure</b>
+            <span class="detail">Enable APIs → consent screen → add test user</span>
+          </div>
+          <div class="mini-card">
+            <span class="num-tag">3</span>
+            <b>Connect to n8n</b>
+            <span class="detail">Copy Redirect URL → create credentials → paste into every node</span>
+          </div>
+        </div>
+        <div class="callout warn">
+          <b>If a node says "access blocked"</b>
+          <p>Your app is in Testing mode — add your Google account as a Test User under OAuth consent screen → Audience.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SLACK (OPTIONAL) ============ -->
+    <div class="band" id="slack-intro">
+      <span class="part-marker">Optional</span>
+      <h2>Connect Slack to n8n — 3 steps</h2>
+      <p>Same story as Google — make the app, take the 2 keys, tell Slack about n8n. <a class="key" href="https://api.slack.com/apps" target="_blank">Open Slack Apps</a></p>
+    </div>
+
+    <section class="slide" id="slack">
+      <div class="step-head">
+        <div class="step-badge">1</div>
+        <div><span class="step-of">SLACK STEP 1 OF 3</span><h2>Create the Slack app</h2></div>
+      </div>
+      <div class="cols-2">
+        <div class="browser-mock">
+          <div class="browser-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><div class="url-pill">api.slack.com/apps</div></div>
+          <div class="browser-body" style="background:#4A154B; color:#fff; text-align:center; padding:36px 20px;">
+            <div style="font-weight:700; margin-bottom:14px;">api.slack.com/apps</div>
+            <div style="display:inline-block; background:#2EB67D; color:#fff; font-weight:700; padding:10px 22px; border-radius:8px;">Create New App</div>
+            <div style="font-size:0.78rem; margin-top:12px; opacity:0.85;">↑ click the green button → From scratch</div>
+          </div>
+        </div>
+        <ul class="flow">
+          <li><span class="n">1</span><span class="txt">Open <a class="key" style="background:#4A154B;" href="https://api.slack.com/apps" target="_blank">api.slack.com/apps</a> → login</span></li>
+          <li><span class="n">2</span><span class="txt">Click green <b>Create New App</b></span></li>
+          <li><span class="n">3</span><span class="txt">Click <b>From scratch</b></span></li>
+          <li><span class="n">4</span><span class="txt">App Name: write <code class="inline">n8n</code></span></li>
+          <li><span class="n">5</span><span class="txt">Pick your Slack workspace → <b>Create App</b></span></li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="slide" id="slack2">
+      <div class="step-head">
+        <div class="step-badge">2</div>
+        <div><span class="step-of">SLACK STEP 2 OF 3</span><h2>Get your ID / Secret</h2></div>
+      </div>
+      <p class="step-sub">You land on <b>Basic Information</b>. Scroll down to <b>App Credentials</b>.</p>
+      <ul class="flow">
+        <li><span class="n">1</span><span class="txt">Scroll down to <b>App Credentials</b></span></li>
+        <li><span class="n">2</span><span class="txt"><b>Client ID</b> → Copy</span></li>
+        <li><span class="n">3</span><span class="txt"><b>Client Secret</b> → Show → Copy</span></li>
+      </ul>
+      <div class="callout warn" style="margin-top:18px;">
+        <b>Save both NOW</b>
+        <p>You will paste this same pair into n8n again and again.</p>
+      </div>
+    </section>
+
+    <section class="slide" id="slack3">
+      <div class="step-head">
+        <div class="step-badge">3</div>
+        <div><span class="step-of">SLACK STEP 3 OF 3</span><h2>Set Redirect URL</h2></div>
+      </div>
+      <ul class="flow">
+        <li><span class="n">1</span><span class="txt">Left side → <b>OAuth &amp; Permissions</b></span></li>
+        <li><span class="n">2</span><span class="txt">Find Redirect URLs → <b>Add New Redirect URL</b></span></li>
+        <li><span class="n">3</span><span class="txt">Paste <code class="inline">http://localhost:5678/rest/oauth2-credential/callback</code> → Add → Save URLs</span></li>
+      </ul>
+      <div class="callout accent" style="margin-top:18px;">
+        <b>Done</b>
+        <p>In n8n add a Slack node → paste Client ID → paste Secret → Connect.</p>
+      </div>
+    </section>
+
+    <!-- VIDEOS -->
+    <section class="slide" id="videos">
+      <span class="chip">▶ Watch — no reading</span>
+      <h1 class="page-h">Watch it being done</h1>
+      <div class="card-grid" style="grid-template-columns: 1fr 1fr;">
+        <a class="mini-card" style="text-decoration:none; color:inherit;" href="https://www.youtube.com/watch?v=9XwQ5s_t38Y" target="_blank">
+          <img src="https://img.youtube.com/vi/9XwQ5s_t38Y/hqdefault.jpg" alt="Install n8n on Windows video" style="width:100%; border-radius:8px; margin-bottom:10px;">
+          <b>Install n8n on Windows (no Docker)</b><span class="detail">Same steps as above</span>
+        </a>
+        <a class="mini-card" style="text-decoration:none; color:inherit;" href="https://www.youtube.com/watch?v=HUbEPo-yfeA" target="_blank">
+          <img src="https://img.youtube.com/vi/HUbEPo-yfeA/hqdefault.jpg" alt="n8n quick start video" style="width:100%; border-radius:8px; margin-bottom:10px;">
+          <b>n8n Quick Start</b><span class="detail">First workflow</span>
+        </a>
+      </div>
+    </section>
+
+    <!-- FINAL CTA -->
+    <div class="final-cta" id="done">
+      <h2>That's it — n8n is yours.</h2>
+      <p>Running locally, free, private, ready whenever you need it.<br>Next time: black box → n8n → localhost:5678.</p>
+      <a href="#top" class="btn">Back to top ↑</a>
+    </div>
+
+  </main>
+</div>
+
+<div class="footer">
+  <div class="footer-inner">
+    <div>
+      <h4 style="font-family:var(--serif); font-size:1rem; color:#fff; text-transform:none; letter-spacing:0;">n8n Setup Guide</h4>
+      <p>Gurukul-style visual guide. Real links, real photos, copy buttons everywhere.</p>
+    </div>
+    <div>
+      <h4>Part One</h4>
+      <a href="#s1">Node.js</a>
+      <a href="#s2">Verify + Allow</a>
+      <a href="#s4">Install n8n</a>
+      <a href="#s5">Run n8n</a>
+    </div>
+    <div>
+      <h4>Part Two</h4>
+      <a href="#g1">Cloud project</a>
+      <a href="#g2">Enable APIs</a>
+      <a href="#g5">Credentials</a>
+      <a href="#slack">Slack</a>
+    </div>
+    <div>
+      <h4>Official</h4>
+      <a href="https://nodejs.org/en/download" target="_blank">Node.js download</a>
+      <a href="https://docs.n8n.io/deploy/host-n8n/install-options/install-with-npm" target="_blank">n8n docs</a>
+      <a href="https://console.cloud.google.com/" target="_blank">Cloud Console</a>
+      <a href="https://api.slack.com/apps" target="_blank">Slack Apps</a>
+    </div>
+  </div>
+  <div class="footer-bottom"><span>© 2026 Gurukul Guide — Maroon · Red · Cream · Gold</span><span>Fraunces + Inter + JetBrains Mono</span></div>
+</div>
+
+<script>
+  const links = document.querySelectorAll('.step-link');
+  const sections = Array.from(links).map(l => document.getElementById(l.dataset.target)).filter(Boolean);
+
+  links.forEach(link => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      const el = document.getElementById(link.dataset.target);
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+
+  function onScroll() {
+    let current = sections[0];
+    const scrollPos = window.scrollY + 140;
+    for (const sec of sections) {
+      if (sec.offsetTop <= scrollPos) current = sec;
+    }
+    links.forEach(l => l.classList.toggle('active', l.dataset.target === current?.id));
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+  document.querySelectorAll('main section.slide').forEach(function(tile) {
+    if (tile.querySelector('.help-row')) return;
+    var id = tile.id || '';
+    if (!id) return;
+    var q = encodeURIComponent('I am stuck on n8n setup guide step ' + id + ' — error: [paste your red error here]. How to fix on Windows?');
+    var row = document.createElement('div');
+    row.className = 'help-row';
+    row.innerHTML = '<span>Stuck? Huge error?</span><a class="help-btn" href="https://chat.openai.com/?q=' + q + '" target="_blank">Ask ChatGPT — Fix it</a><span>Only if problem — paste red text</span>';
+    tile.appendChild(row);
+  });
+</script>
+
+</body>
+</html>
