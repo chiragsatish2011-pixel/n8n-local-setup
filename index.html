@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="A clear, beginner-friendly guide to installing n8n locally on Windows and connecting Google and Slack services.">
+<meta name="theme-color" content="#5C1010">
+<meta name="color-scheme" content="light">
 <title>Run n8n on Your Own Computer — Setup Guide</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='16' fill='%235C1010'/%3E%3Ctext x='16' y='22' font-size='15' text-anchor='middle' fill='%23F2A93B' font-family='Georgia' font-weight='bold'%3En%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -28,6 +31,11 @@
 
   * { box-sizing: border-box; }
   html { scroll-behavior: smooth; }
+  body { overflow-x: hidden; }
+  :focus-visible { outline: 3px solid var(--saffron); outline-offset: 3px; }
+  .skip-link { position: fixed; left: 16px; top: -100px; z-index: 1000; background: #fff; color: var(--maroon); padding: 10px 14px; border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,.2); font-weight: 700; text-decoration: none; }
+  .skip-link:focus { top: 16px; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; } }
 
   body {
     margin: 0;
@@ -390,6 +398,7 @@
 
   .shotfig { border: 1px solid #e5ded2; border-radius: 10px; overflow: hidden; margin-top: 16px; background: #fff; box-shadow: 0 10px 30px rgba(0,0,0,0.10); }
   .shotfig img { width: 100%; display: block; }
+  .asset-placeholder { min-height: 180px; display: grid; place-items: center; padding: 30px; color: var(--ink-soft); background: linear-gradient(135deg, var(--cream), #fff); font-family: var(--serif); font-size: 1.15rem; text-align: center; }
   .shotfig figcaption { font-size: 0.78rem; color: var(--ink-soft); padding: 8px 12px; border-top: 1px solid #e5ded2; display: flex; justify-content: space-between; gap: 8px; background: var(--ivory); }
   .shotfig figcaption a { color: var(--saffron); font-weight: 700; }
 
@@ -650,52 +659,53 @@
 </style>
 </head>
 <body>
+<a class="skip-link" href="#main-content">Skip to main content</a>
 
-<header class="ghead">
+<header class="ghead" aria-label="Site header">
   <div class="logotext">n8n Setup Guide<span>Windows - Local install</span></div>
-  <nav class="gnav">
+  <nav class="gnav" aria-label="Primary navigation">
     <a href="#s-ready">Start</a>
     <a href="#s1">Install</a>
     <a href="#g0">Google</a>
     <a href="#slack">Slack</a>
     <a href="#videos">Videos</a>
-    <a href="https://nodejs.org/en/download" target="_blank" class="dl">Download</a>
+    <a href="https://nodejs.org/en/download" target="_blank" rel="noopener noreferrer" class="dl">Download</a>
   </nav>
 </header>
 
 <div class="shell">
 
   <!-- ================= SIDEBAR / STEP TRACKER ================= -->
-  <nav class="rail" id="rail">
+  <nav class="rail" id="rail" aria-label="Guide sections">
     <div class="rail-brand">n8n Setup Guide<span>Windows · Local install</span></div>
 
     <div class="rail-group-label">Part One — Install</div>
-    <a class="step-link" data-target="s-ready"><span class="num">•</span> Get ready</a>
-    <a class="step-link" data-target="s1"><span class="num">1</span> Install Node.js</a>
-    <a class="step-link" data-target="s2"><span class="num">2</span> Verify + Allow scripts</a>
-    <a class="step-link" data-target="s4"><span class="num">3</span> Install n8n</a>
-    <a class="step-link" data-target="s5"><span class="num">4</span> Run n8n</a>
-    <a class="step-link" data-target="s6"><span class="num">5</span> Restart &amp; verify</a>
-    <a class="step-link" data-target="s-trouble"><span class="num">?</span> Troubleshooting</a>
-    <a class="step-link" data-target="s-recap1"><span class="num">✓</span> Cheat sheet</a>
+    <a class="step-link" data-target="s-ready" href="#s-ready"><span class="num">•</span> Get ready</a>
+    <a class="step-link" data-target="s1" href="#s1"><span class="num">1</span> Install Node.js</a>
+    <a class="step-link" data-target="s2" href="#s2"><span class="num">2</span> Verify + Allow scripts</a>
+    <a class="step-link" data-target="s4" href="#s4"><span class="num">3</span> Install n8n</a>
+    <a class="step-link" data-target="s5" href="#s5"><span class="num">4</span> Run n8n</a>
+    <a class="step-link" data-target="s6" href="#s6"><span class="num">5</span> Restart &amp; verify</a>
+    <a class="step-link" data-target="s-trouble" href="#s-trouble"><span class="num">?</span> Troubleshooting</a>
+    <a class="step-link" data-target="s-recap1" href="#s-recap1"><span class="num">✓</span> Cheat sheet</a>
 
     <div class="rail-group-label">Part Two — Google</div>
-    <a class="step-link" data-target="g0"><span class="num">•</span> Overview</a>
-    <a class="step-link" data-target="g1"><span class="num">1</span> Cloud project</a>
-    <a class="step-link" data-target="g2"><span class="num">2</span> Enable APIs</a>
-    <a class="step-link" data-target="g3"><span class="num">3</span> Consent screen</a>
-    <a class="step-link" data-target="g4"><span class="num">4</span> Test user</a>
-    <a class="step-link" data-target="g5"><span class="num">5</span> Credentials</a>
-    <a class="step-link" data-target="g6"><span class="num">6</span> Save &amp; connect</a>
-    <a class="step-link" data-target="g-recap"><span class="num">✓</span> Cheat sheet</a>
+    <a class="step-link" data-target="g0" href="#g0"><span class="num">•</span> Overview</a>
+    <a class="step-link" data-target="g1" href="#g1"><span class="num">1</span> Cloud project</a>
+    <a class="step-link" data-target="g2" href="#g2"><span class="num">2</span> Enable APIs</a>
+    <a class="step-link" data-target="g3" href="#g3"><span class="num">3</span> Consent screen</a>
+    <a class="step-link" data-target="g4" href="#g4"><span class="num">4</span> Test user</a>
+    <a class="step-link" data-target="g5" href="#g5"><span class="num">5</span> Credentials</a>
+    <a class="step-link" data-target="g6" href="#g6"><span class="num">6</span> Save &amp; connect</a>
+    <a class="step-link" data-target="g-recap" href="#g-recap"><span class="num">✓</span> Cheat sheet</a>
 
     <div class="rail-group-label">Optional</div>
-    <a class="step-link" data-target="slack"><span class="num">◈</span> Slack setup</a>
-    <a class="step-link" data-target="videos"><span class="num">▶</span> Videos</a>
+    <a class="step-link" data-target="slack" href="#slack"><span class="num">◈</span> Slack setup</a>
+    <a class="step-link" data-target="videos" href="#videos"><span class="num">▶</span> Videos</a>
   </nav>
 
   <!-- ================= MAIN CONTENT ================= -->
-  <main>
+  <main id="main-content">
 
     <!-- HERO -->
     <header class="hero" id="top">
@@ -705,7 +715,7 @@
         <p class="lede">A click-by-click guide to installing n8n locally — free, private, and yours to keep. No experience required.</p>
         <div class="hero-actions">
           <a href="#s1" class="btn-act btn-saffron">Start — Step 1</a>
-          <a href="https://nodejs.org/en/download" target="_blank" class="btn-act btn-white">Download Node.js</a>
+          <a href="https://nodejs.org/en/download" target="_blank" rel="noopener noreferrer" class="btn-act btn-white">Download Node.js</a>
         </div>
         <div class="hero-stats">
           <div><strong>~15 min</strong> total time</div>
@@ -747,16 +757,16 @@
           
           
           <div class="shotfig">
-            <img src="screenshots/shot-nodejs-home.png" alt="Real photo of the nodejs.org homepage">
-            <figcaption><span>Real photo — click Downloads, then pick LTS on the next page</span><a href="https://nodejs.org/en/download" target="_blank">Open →</a></figcaption>
+            <img src="screenshots/shot-nodejs-home.png" alt="The nodejs.org homepage" loading="lazy" onerror="this.hidden=true; this.nextElementSibling.hidden=false"><div class="asset-placeholder" hidden>Node.js download page preview</div>
+            <figcaption><span>Real photo — click Downloads, then pick LTS on the next page</span><a href="https://nodejs.org/en/download" target="_blank" rel="noopener noreferrer">Open →</a></figcaption>
           </div>
           <div class="link-row">
-            <a class="key" href="https://nodejs.org/en/download" target="_blank">⬇ Download page</a>
-            <a class="key" style="background:var(--maroon);" href="https://nodejs.org/dist/v24.20.0/node-v24.20.0-x64.msi" target="_blank">Direct MSI</a>
+            <a class="key" href="https://nodejs.org/en/download" target="_blank" rel="noopener noreferrer">⬇ Download page</a>
+            <a class="key" style="background:var(--maroon);" href="https://nodejs.org/dist/v24.20.0/node-v24.20.0-x64.msi" target="_blank" rel="noopener noreferrer">Direct MSI</a>
           </div>
         </div>
         <ul class="flow">
-          <li><span class="n">1</span><span class="txt">Go to <a class="key" href="https://nodejs.org/en/download" target="_blank">nodejs.org</a></span></li>
+          <li><span class="n">1</span><span class="txt">Go to <a class="key" href="https://nodejs.org/en/download" target="_blank" rel="noopener noreferrer">nodejs.org</a></span></li>
           <li><span class="n">2</span><span class="txt">Click <b>LTS</b> version <small>(skip "Current")</small></span></li>
           <li><span class="n">3</span><span class="txt">Open the downloaded <code class="inline">.msi</code></span></li>
           <li><span class="n">4</span><span class="txt">Click Next → Next → Finish</span></li>
@@ -780,7 +790,7 @@
             <div class="cmd">npm -v</div>
             <div class="out">12.0.2</div>
           </div>
-          <button class="copy-btn" onclick="navigator.clipboard.writeText('node -v')">Copy</button>
+          <button type="button" class="copy-btn" aria-live="polite" >Copy</button>
         </div>
         <ul class="flow">
           <li><span class="n">1</span><span class="txt">Press <kbd>Win</kbd> + <kbd>X</kbd></span></li>
@@ -799,7 +809,7 @@
           <div>Do you want to change the execution policy?</div>
           <div>[Y] Yes  [N] No  [S] Suspend (default is "N"): <b style="color:#fff;">Y</b></div>
         </div>
-        <button class="copy-btn" onclick="navigator.clipboard.writeText('Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser')">Copy</button>
+        <button type="button" class="copy-btn" aria-live="polite" >Copy</button>
       </div>
 
       
@@ -825,17 +835,17 @@
         <div class="step-badge">3</div>
         <div><span class="step-of">STEP 3 OF 5</span><h2>Install n8n</h2></div>
       </div>
-      <p class="step-sub">One command does it all. <a href="https://docs.n8n.io/deploy/host-n8n/install-options/install-with-npm" target="_blank">Same line in official docs</a>.</p>
+      <p class="step-sub">One command does it all. <a href="https://docs.n8n.io/deploy/host-n8n/install-options/install-with-npm" target="_blank" rel="noopener noreferrer">Same line in official docs</a>.</p>
 
       <div class="shotfig">
-        <img src="screenshots/shot-n8n-docs.png" alt="Real photo of the official n8n npm install docs">
-        <figcaption><span>Real photo — official docs, same command</span><a href="https://docs.n8n.io/deploy/host-n8n/install-options/install-with-npm" target="_blank">Open →</a></figcaption>
+        <img src="screenshots/shot-n8n-docs.png" alt="The official n8n npm install documentation" loading="lazy" onerror="this.hidden=true; this.nextElementSibling.hidden=false"><div class="asset-placeholder" hidden>Official n8n installation documentation preview</div>
+        <figcaption><span>Real photo — official docs, same command</span><a href="https://docs.n8n.io/deploy/host-n8n/install-options/install-with-npm" target="_blank" rel="noopener noreferrer">Open →</a></figcaption>
       </div>
 
       <div class="term">
         <div class="term-bar"><span></span><span></span><span></span><div class="term-title">Windows PowerShell</div></div>
         <div class="term-body"><div class="cmd">npm install -g n8n</div></div>
-        <button class="copy-btn" onclick="navigator.clipboard.writeText('npm install -g n8n')">Copy</button>
+        <button type="button" class="copy-btn" aria-live="polite" >Copy</button>
       </div>
 
       
@@ -860,14 +870,14 @@
           <div class="term" style="margin-bottom:14px;">
             <div class="term-bar"><span></span><span></span><span></span><div class="term-title">Option A — installed</div></div>
             <div class="term-body"><div class="cmd">n8n</div></div>
-            <button class="copy-btn" onclick="navigator.clipboard.writeText('n8n')">Copy</button>
+            <button type="button" class="copy-btn" aria-live="polite" >Copy</button>
           </div>
           <div class="term">
             <div class="term-bar"><span></span><span></span><span></span><div class="term-title">Option B — quick try, no install</div></div>
             <div class="term-body"><div class="cmd">npx n8n</div></div>
-            <button class="copy-btn" onclick="navigator.clipboard.writeText('npx n8n')">Copy</button>
+            <button type="button" class="copy-btn" aria-live="polite" >Copy</button>
           </div>
-          <div class="link-row"><a class="key" href="http://localhost:5678" target="_blank">Open localhost:5678</a></div>
+          <div class="link-row"><a class="key" href="http://localhost:5678" target="_blank" rel="noopener noreferrer">Open localhost:5678</a></div>
         </div>
         <div class="browser-mock" style="height:100%;">
           <div class="browser-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><div class="url-pill">localhost:5678</div></div>
@@ -933,7 +943,7 @@
           <div class="cmd">n8n</div>
           <div class="comment"># then visit localhost:5678</div>
         </div>
-        <button class="copy-btn" onclick="navigator.clipboard.writeText('node -v\nnpm -v\nSet-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser\nnpm install -g n8n\nn8n')">Copy all</button>
+        <button type="button" class="copy-btn" aria-live="polite" >Copy all</button>
       </div>
       <div class="callout accent" style="margin-top:18px;">
         <b>Next time</b>
@@ -947,7 +957,7 @@
       <h2>Turn 2-Step Verification (2SV) ON — keep the tab open</h2>
       <p>Google stops new work if 2-Step Verification is OFF. Turn it ON now, keep the tab open through all Google steps below. When you are done, you may turn it OFF again from the same page.</p>
       <ul class="flow" style="max-width:560px; margin-top:14px;">
-        <li><span class="n">1</span><span class="txt"><b>Open the 2-Step Verification page</b> <a class="key" href="https://myaccount.google.com/signinoptions/two-step-verification" target="_blank">Turn ON page</a></span></li>
+        <li><span class="n">1</span><span class="txt"><b>Open the 2-Step Verification page</b> <a class="key" href="https://myaccount.google.com/signinoptions/two-step-verification" target="_blank" rel="noopener noreferrer">Turn ON page</a></span></li>
         <li><span class="n">2</span><span class="txt"><b>Click TURN ON → Done → DO NOT CLOSE this tab</b></span></li>
       </ul>
     </div>
@@ -958,7 +968,7 @@
         <div class="g-icon">G</div>
         <span class="part-marker">Part Two</span>
         <h2>Connecting Google apps to n8n</h2>
-        <p>Let n8n read Gmail, edit Sheets, manage Calendar. Six steps, once per project. <a class="key" href="https://console.cloud.google.com/" target="_blank">Open Console</a></p>
+        <p>Let n8n read Gmail, edit Sheets, manage Calendar. Six steps, once per project. <a class="key" href="https://console.cloud.google.com/" target="_blank" rel="noopener noreferrer">Open Console</a></p>
         <div class="card-grid" style="grid-template-columns: repeat(3,1fr);">
           <div class="mini-card"><span class="num-tag">1</span><b>Cloud project</b><span class="detail">Free, no billing</span></div>
           <div class="mini-card"><span class="num-tag">2</span><b>Enable APIs</b><span class="detail">Gmail, Sheets, Drive…</span></div>
@@ -978,10 +988,10 @@
       </div>
       <p class="step-sub">Free. Stays free for local n8n use.</p>
       <ul class="flow">
-        <li><span class="n">1</span><span class="txt">Go to <a class="key" href="https://console.cloud.google.com/" target="_blank">console.cloud.google.com</a></span></li>
+        <li><span class="n">1</span><span class="txt">Go to <a class="key" href="https://console.cloud.google.com/" target="_blank" rel="noopener noreferrer">console.cloud.google.com</a></span></li>
         <li><span class="n">2</span><span class="txt">Sign in with any Google account (or sign up free)</span></li>
         <li><span class="n">3</span><span class="txt"><b>If Google asks for money or card — SKIP it.</b> <small>Erase that page. Just open console.cloud.google.com. Home n8n needs NO billing.</small></span></li>
-        <li><span class="n">4</span><span class="txt">Click project dropdown (top bar) → <a href="https://console.cloud.google.com/projectcreate" target="_blank"><b>New Project</b></a></span></li>
+        <li><span class="n">4</span><span class="txt">Click project dropdown (top bar) → <a href="https://console.cloud.google.com/projectcreate" target="_blank" rel="noopener noreferrer"><b>New Project</b></a></span></li>
         <li><span class="n">5</span><span class="txt">Name it → Create → wait 10 sec → click it</span></li>
       </ul>
       <div class="callout accent" style="margin-top:20px;">
@@ -1004,16 +1014,16 @@
 
       <div class="cols-2">
         <ul class="flow">
-          <li><span class="n">1</span><span class="txt">☰ menu → APIs &amp; Services → <a class="key" href="https://console.cloud.google.com/apis/library" target="_blank">Library</a></span></li>
+          <li><span class="n">1</span><span class="txt">☰ menu → APIs &amp; Services → <a class="key" href="https://console.cloud.google.com/apis/library" target="_blank" rel="noopener noreferrer">Library</a></span></li>
           <li><span class="n">2</span><span class="txt">Search the API name in the top search box</span></li>
           <li><span class="n">3</span><span class="txt">Click result → <b>Enable</b> (blue button)</span></li>
           <li><span class="n">4</span><span class="txt">Back to Library → repeat for each app below</span></li>
         </ul>
         <div class="app-list">
-          <a class="app-row" href="https://console.cloud.google.com/apis/library/gmail.googleapis.com" target="_blank"><div class="swatch" style="background:#EA4335;">✉️</div><div><b>Gmail API → Enable</b><span>Read, send &amp; label</span></div></a>
-          <a class="app-row" href="https://console.cloud.google.com/apis/library/sheets.googleapis.com" target="_blank"><div class="swatch" style="background:#0F9D58;">▦</div><div><b>Sheets API → Enable</b><span>Read/write rows</span></div></a>
-          <a class="app-row" href="https://console.cloud.google.com/apis/library/drive.googleapis.com" target="_blank"><div class="swatch" style="background:#4285F4;">▲</div><div><b>Drive API → Enable</b><span>Upload &amp; manage files</span></div></a>
-          <a class="app-row" href="https://console.cloud.google.com/apis/library/calendar-json.googleapis.com" target="_blank"><div class="swatch" style="background:#8B1E1E;">31</div><div><b>Calendar API → Enable</b><span>Create &amp; update events</span></div></a>
+          <a class="app-row" href="https://console.cloud.google.com/apis/library/gmail.googleapis.com" target="_blank" rel="noopener noreferrer"><div class="swatch" style="background:#EA4335;">✉️</div><div><b>Gmail API → Enable</b><span>Read, send &amp; label</span></div></a>
+          <a class="app-row" href="https://console.cloud.google.com/apis/library/sheets.googleapis.com" target="_blank" rel="noopener noreferrer"><div class="swatch" style="background:#0F9D58;">▦</div><div><b>Sheets API → Enable</b><span>Read/write rows</span></div></a>
+          <a class="app-row" href="https://console.cloud.google.com/apis/library/drive.googleapis.com" target="_blank" rel="noopener noreferrer"><div class="swatch" style="background:#4285F4;">▲</div><div><b>Drive API → Enable</b><span>Upload &amp; manage files</span></div></a>
+          <a class="app-row" href="https://console.cloud.google.com/apis/library/calendar-json.googleapis.com" target="_blank" rel="noopener noreferrer"><div class="swatch" style="background:#8B1E1E;">31</div><div><b>Calendar API → Enable</b><span>Create &amp; update events</span></div></a>
         </div>
       </div>
     </section>
@@ -1026,7 +1036,7 @@
       </div>
       <p class="step-sub">Google needs to know your app's name.</p>
       <ul class="flow">
-        <li><span class="n">1</span><span class="txt">Sidebar → <a class="key" href="https://console.cloud.google.com/apis/credentials/consent" target="_blank">OAuth consent screen</a></span></li>
+        <li><span class="n">1</span><span class="txt">Sidebar → <a class="key" href="https://console.cloud.google.com/apis/credentials/consent" target="_blank" rel="noopener noreferrer">OAuth consent screen</a></span></li>
         <li><span class="n">2</span><span class="txt">App name — anything, e.g. "My n8n Automations"</span></li>
         <li><span class="n">3</span><span class="txt">Pick your support email</span></li>
         <li><span class="n">4</span><span class="txt">Next → Next → choose <b>External</b> → Finish</span></li>
@@ -1053,7 +1063,7 @@
           </div>
         </div>
         <ul class="flow">
-          <li><span class="n">1</span><span class="txt">Consent screen → <a href="https://console.cloud.google.com/apis/credentials/consent" target="_blank"><b>Audience</b></a> tab</span></li>
+          <li><span class="n">1</span><span class="txt">Consent screen → <a href="https://console.cloud.google.com/apis/credentials/consent" target="_blank" rel="noopener noreferrer"><b>Audience</b></a> tab</span></li>
           <li><span class="n">2</span><span class="txt">Find <b>Test users</b> → "+ Add users"</span></li>
           <li><span class="n">3</span><span class="txt">Type the Gmail you'll use in n8n</span></li>
           <li><span class="n">4</span><span class="txt">Save</span></li>
@@ -1076,7 +1086,7 @@
       <div class="cols-2">
         <ul class="flow">
           <li><span class="n">1</span><span class="txt">Click "Get started" to finish setup</span></li>
-          <li><span class="n">2</span><span class="txt">Sidebar → <a class="key" href="https://console.cloud.google.com/apis/credentials" target="_blank">Credentials</a></span></li>
+          <li><span class="n">2</span><span class="txt">Sidebar → <a class="key" href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener noreferrer">Credentials</a></span></li>
           <li><span class="n">3</span><span class="txt">"+ Create Credentials"</span></li>
           <li><span class="n">4</span><span class="txt">Choose <b>OAuth client ID</b></span></li>
           <li><span class="n">5</span><span class="txt">Application type → <b>Web application</b></span></li>
@@ -1094,7 +1104,7 @@
           <div class="out">http://localhost:5678/rest/oauth2-credential/callback</div>
           <div class="comment"># copy this exact URL into Google Cloud Console</div>
         </div>
-        <button class="copy-btn" onclick="navigator.clipboard.writeText('http://localhost:5678/rest/oauth2-credential/callback')">Copy URL</button>
+        <button type="button" class="copy-btn" aria-live="polite" >Copy URL</button>
       </div>
     </section>
 
@@ -1155,7 +1165,7 @@
     <div class="band" id="slack-intro">
       <span class="part-marker">Optional</span>
       <h2>Connect Slack to n8n — 3 steps</h2>
-      <p>Same story as Google — make the app, take the 2 keys, tell Slack about n8n. <a class="key" href="https://api.slack.com/apps" target="_blank">Open Slack Apps</a></p>
+      <p>Same story as Google — make the app, take the 2 keys, tell Slack about n8n. <a class="key" href="https://api.slack.com/apps" target="_blank" rel="noopener noreferrer">Open Slack Apps</a></p>
     </div>
 
     <section class="slide" id="slack">
@@ -1173,7 +1183,7 @@
           </div>
         </div>
         <ul class="flow">
-          <li><span class="n">1</span><span class="txt">Open <a class="key" style="background:#4A154B;" href="https://api.slack.com/apps" target="_blank">api.slack.com/apps</a> → login</span></li>
+          <li><span class="n">1</span><span class="txt">Open <a class="key" style="background:#4A154B;" href="https://api.slack.com/apps" target="_blank" rel="noopener noreferrer">api.slack.com/apps</a> → login</span></li>
           <li><span class="n">2</span><span class="txt">Click green <b>Create New App</b></span></li>
           <li><span class="n">3</span><span class="txt">Click <b>From scratch</b></span></li>
           <li><span class="n">4</span><span class="txt">App Name: write <code class="inline">n8n</code></span></li>
@@ -1220,11 +1230,11 @@
       <span class="chip">▶ Watch — no reading</span>
       <h1 class="page-h">Watch it being done</h1>
       <div class="card-grid" style="grid-template-columns: 1fr 1fr;">
-        <a class="mini-card" style="text-decoration:none; color:inherit;" href="https://www.youtube.com/watch?v=9XwQ5s_t38Y" target="_blank">
+        <a class="mini-card" style="text-decoration:none; color:inherit;" href="https://www.youtube.com/watch?v=9XwQ5s_t38Y" target="_blank" rel="noopener noreferrer">
           <img src="https://img.youtube.com/vi/9XwQ5s_t38Y/hqdefault.jpg" alt="Install n8n on Windows video" style="width:100%; border-radius:8px; margin-bottom:10px;">
           <b>Install n8n on Windows (no Docker)</b><span class="detail">Same steps as above</span>
         </a>
-        <a class="mini-card" style="text-decoration:none; color:inherit;" href="https://www.youtube.com/watch?v=HUbEPo-yfeA" target="_blank">
+        <a class="mini-card" style="text-decoration:none; color:inherit;" href="https://www.youtube.com/watch?v=HUbEPo-yfeA" target="_blank" rel="noopener noreferrer">
           <img src="https://img.youtube.com/vi/HUbEPo-yfeA/hqdefault.jpg" alt="n8n quick start video" style="width:100%; border-radius:8px; margin-bottom:10px;">
           <b>n8n Quick Start</b><span class="detail">First workflow</span>
         </a>
@@ -1263,10 +1273,10 @@
     </div>
     <div>
       <h4>Official</h4>
-      <a href="https://nodejs.org/en/download" target="_blank">Node.js download</a>
-      <a href="https://docs.n8n.io/deploy/host-n8n/install-options/install-with-npm" target="_blank">n8n docs</a>
-      <a href="https://console.cloud.google.com/" target="_blank">Cloud Console</a>
-      <a href="https://api.slack.com/apps" target="_blank">Slack Apps</a>
+      <a href="https://nodejs.org/en/download" target="_blank" rel="noopener noreferrer">Node.js download</a>
+      <a href="https://docs.n8n.io/deploy/host-n8n/install-options/install-with-npm" target="_blank" rel="noopener noreferrer">n8n docs</a>
+      <a href="https://console.cloud.google.com/" target="_blank" rel="noopener noreferrer">Cloud Console</a>
+      <a href="https://api.slack.com/apps" target="_blank" rel="noopener noreferrer">Slack Apps</a>
     </div>
   </div>
   <div class="footer-bottom"><span>© 2026 Gurukul Guide — Maroon · Red · Cream · Gold</span><span>Fraunces + Inter + JetBrains Mono</span></div>
@@ -1277,32 +1287,61 @@
   const sections = Array.from(links).map(l => document.getElementById(l.dataset.target)).filter(Boolean);
 
   links.forEach(link => {
-    link.addEventListener('click', (e) => {
-      e.preventDefault();
-      const el = document.getElementById(link.dataset.target);
-      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    link.addEventListener('click', (event) => {
+      const section = document.getElementById(link.dataset.target);
+      if (!section) return;
+      event.preventDefault();
+      section.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
+      history.replaceState(null, '', `#${section.id}`);
     });
   });
 
   function onScroll() {
     let current = sections[0];
     const scrollPos = window.scrollY + 140;
-    for (const sec of sections) {
-      if (sec.offsetTop <= scrollPos) current = sec;
+    for (const section of sections) {
+      if (section.offsetTop <= scrollPos) current = section;
     }
-    links.forEach(l => l.classList.toggle('active', l.dataset.target === current?.id));
+    links.forEach(link => link.classList.toggle('active', link.dataset.target === current?.id));
   }
   window.addEventListener('scroll', onScroll, { passive: true });
   onScroll();
 
-  document.querySelectorAll('main section.slide').forEach(function(tile) {
+  async function copyText(text, button) {
+    try {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(text);
+      } else {
+        const area = document.createElement('textarea');
+        area.value = text;
+        area.style.position = 'fixed'; area.style.opacity = '0';
+        document.body.appendChild(area); area.select();
+        document.execCommand('copy'); area.remove();
+      }
+      const original = button.textContent;
+      button.textContent = 'Copied';
+      window.setTimeout(() => { button.textContent = original; }, 1400);
+    } catch (error) {
+      button.textContent = 'Copy failed';
+      window.setTimeout(() => { button.textContent = 'Copy'; }, 1800);
+    }
+  }
+
+  document.querySelectorAll('.copy-btn').forEach(button => {
+    const terminal = button.closest('.term');
+    const command = terminal?.querySelector('.cmd')?.textContent?.replace(/^\s*/, '').trim();
+    if (!command) { button.disabled = true; return; }
+    button.addEventListener('click', () => copyText(command, button));
+  });
+
+  document.querySelectorAll('main section.slide').forEach(tile => {
     if (tile.querySelector('.help-row')) return;
-    var id = tile.id || '';
+    const id = tile.id || '';
     if (!id) return;
-    var q = encodeURIComponent('I am stuck on n8n setup guide step ' + id + ' — error: [paste your red error here]. How to fix on Windows?');
-    var row = document.createElement('div');
+    const query = encodeURIComponent(`I am stuck on n8n setup guide step ${id} — error: [paste your red error here]. How to fix on Windows?`);
+    const row = document.createElement('div');
     row.className = 'help-row';
-    row.innerHTML = '<span>Stuck? Huge error?</span><a class="help-btn" href="https://chat.openai.com/?q=' + q + '" target="_blank">Ask ChatGPT — Fix it</a><span>Only if problem — paste red text</span>';
+    row.innerHTML = `<span>Stuck? Huge error?</span><a class="help-btn" href="https://chat.openai.com/?q=${query}" target="_blank" rel="noopener noreferrer">Ask ChatGPT — Fix it</a><span>Only if problem — paste red text</span>`;
     tile.appendChild(row);
   });
 </script>
